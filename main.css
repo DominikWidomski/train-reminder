@@ -1,0 +1,131 @@
+/* General */
+code {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 12px;
+  /*font-family: "Monaco", monospace;*/
+  margin: 0;
+  border: 1px solid #ddd;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+  padding: 0;
+}
+
+/* DD Staging */
+
+.dd-search {
+  margin-bottom: 20px;
+}
+
+.dd-search input {
+  font-size: 30px;
+  padding: 10px;
+  color: #ccc;
+  border-radius: 3px;
+  border: 1px solid #eee;
+}
+.dd-search input:focus {
+  outline: none;
+  border-color: #bbb;
+  color: #aaa;
+}
+.dd-search input::-webkit-input-placeholder {
+  color: #eee;
+}
+
+
+
+.dd-ext-act {
+  position: fixed; 
+  bottom: 5px; 
+  right: 5px;
+  color: #ccc;
+}
+
+
+/* DD DEV */
+.dd-dev-debug-toggle {
+  font-family: "Monaco", Arial, sans-serif;
+  font-size: 10px;
+  position: fixed;
+  top: 5px;
+  left: 5px;
+  padding: 5px 7px;
+  margin: 0;
+  border: 1px solid #ccc;
+  background: white;
+  display: block;
+  border-radius: 3px;
+  z-index: 99;
+}
+
+
+/* Trello */
+
+.list {
+  counter-reset: itemIndex;
+}
+
+.list-card {
+  counter-increment: itemIndex;
+}
+
+.list-card:before {
+  content: counter(itemIndex); 
+  position: absolute; 
+  z-index: 1;
+  padding: 0 2px;
+  border-width: 0 1px 1px 0;
+  border-style: solid;
+  border-color: #ccc;
+  background: #fff;
+  border-radius: 3px 0;
+}
+
+.list-card .list-card-title {
+  text-indent: 20px;
+}
+.list-card.has-cover .list-card-title {
+  text-indent: 0;
+}
+
+.dom-debug {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 400px;
+  height: 400px;
+  border-radius: 3px;
+  background: #eee;
+  box-shadow: 0 0 5px rgba(0.6, 0.6, 0.6, 0.6);
+}
+
+.dom-debug .head {
+  background: #ddd;
+  text-align: center;
+  padding: 0 10px;
+}
+.dom-debug .body {
+  padding: 10px;
+  overflow-y: scroll;
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  bottom: 0; 
+}
+
+.dom-debug label:hover {
+  border-radius: 3px;
+  background: #ddd;
+  cursor: pointer;
+}
+
+
+
+
+
+
+
+
+
+

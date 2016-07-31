@@ -1,0 +1,16 @@
+body {
+	min-width: 500px;
+	font-family: "Monaco", Arial, sans-serif;
+}
+
+.belt {
+	width: 800px;
+	margin: 0 auto;
+}
+
+.box {
+	border-radius: 3px;
+	border: 1px solid #ddd;
+	padding: 10px;
+	margin: 0 0 10px;
+}
