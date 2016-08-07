@@ -43,8 +43,16 @@
 		});
 	}
 
+	function formatTime(date) {
+		return padTime(date.getHours()) + padTime(date.getMinutes());
+	}
+	
 	TFLClient.prototype.getJourneyData = function(from, to) {
 		let requestUrl = template(this.endpoints.journey_planning, [from, to]);
+		const d = new Date();
+		d.setTime(d.getTime() + (d.getTimezoneOffset() * 60 * 1000));
+
+		requestUrl += `?time=${formatTime(d)}`;
 
 		return fetch(requestUrl)
 		.then(response => response.json())
@@ -95,11 +103,11 @@
 		output.innerHTML += '<small>All other lines are good.</small>';
 	}
 
-	function getReadableTime(date) {
-		function padTime(time) {
-			return ('0' + time).substr(-2);
-		}
+	function padTime(time) {
+		return ('0' + time).substr(-2);
+	}
 
+	function getReadableTime(date) {
 		return `${padTime(date.getHours())}:${padTime(date.getMinutes())}`;
 	}
 
@@ -146,8 +154,8 @@
 			let startTime = getReadableTime(new Date(journey.startDateTime));
 			let arrivalTime = getReadableTime(new Date(journey.arrivalDateTime));
 
-			let journeyItem = document.createElement('div');
-			journeyItem.innerHTML = `[${journey.duration}] ${startTime} -> ${arrivalTime}`;
+			let journeyHeader = document.createElement('div');
+			journeyHeader.innerHTML = `[${journey.duration}] ${startTime} -> ${arrivalTime}`;
 
 			let list = document.createElement('ul');
 			for(let leg of journey.legs) {
@@ -169,7 +177,7 @@
 				}
 			}
 
-			output.appendChild(journeyItem);
+			output.appendChild(journeyHeader);
 			output.appendChild(list);
 		});
 
@@ -182,6 +190,8 @@
 	}
 
 	function setLinks(data) {
+		const date = getReadableTime(new Date(data.searchCriteria.dateTime));
+		document.querySelector('.js-current-journey-time').innerText = date;
 		document.querySelector('.js-journey-earlier').setAttribute('href', data.searchCriteria.timeAdjustments.earlier.uri);
 		document.querySelector('.js-journey-later').setAttribute('href', data.searchCriteria.timeAdjustments.later.uri);
 	}
