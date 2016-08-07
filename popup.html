@@ -3,27 +3,24 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Domino's Pizza Bot</title>
-	<link rel="stylesheet" href="">
-	<style>
-		body {
-		  min-width: 400px;
-		  overflow-x: hidden;
-		  text-align: center;
-		  background-color: #45a8ea;
-		  color: #fff;
-		}
-	</style>
+	<title>TrainReminder</title>
+	<link rel="stylesheet" href="main.css">
 </head>
 <body>
+	<div class="snackbar js-loader">
+		Loading...
+	</div>
+
 	<h1>Train Reminder</h1>
+
+	<p class="js-direction"></p>
 
 	<p>
 		Your next train is at:
 	</p>
 
 	<p>
-		<h1>21:30</h1>
+		<h1 class="js-train-time">21:30</h1>
 	</p>
 
 	<p>
@@ -31,8 +28,20 @@
 	</p>
 
 	<p>
-		<h1>21:00</h1>
+		<h1 class="js-leave-time">21:00</h1>
 	</p>
+
+	<div class="row text-center">
+		<div class="col-left">
+			<a href="" class="js-journey-earlier">Earlier</a>
+		</div>
+
+		<span class="js-current-journey-time"></span>
+
+		<div class="col-right">
+			<a href="" class="js-journey-later">Later</a>
+		</div>
+	</div>
 
 	<output class="location"></output>
 

@@ -1,3 +1,14 @@
+/* Base */
+body {
+  font: 16px 'Helvetica Neue';
+  min-width: 400px;
+  overflow-x: hidden;
+  text-align: center;
+  background-color: #45a8ea;
+  color: #fff;
+  font: 16px 'Helvetica Neue';
+}
+
 /* General */
 code {
   font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
@@ -10,84 +21,65 @@ code {
   padding: 0;
 }
 
-/* DD Staging */
-
-.dd-search {
-  margin-bottom: 20px;
+/* Helpers */
+.text-center
+{
+  text-align: center;
 }
 
-.dd-search input {
-  font-size: 30px;
-  padding: 10px;
-  color: #ccc;
-  border-radius: 3px;
-  border: 1px solid #eee;
-}
-.dd-search input:focus {
-  outline: none;
-  border-color: #bbb;
-  color: #aaa;
-}
-.dd-search input::-webkit-input-placeholder {
-  color: #eee;
+/* Grid */
+.row:after
+{
+  content: '';
+  display: table;
+  clear: both;
 }
 
-
-
-.dd-ext-act {
-  position: fixed; 
-  bottom: 5px; 
-  right: 5px;
-  color: #ccc;
+.col-left
+{
+  float: left;
 }
 
+.col-right
+{
+  float: right;
+}
 
-/* DD DEV */
-.dd-dev-debug-toggle {
-  font-family: "Monaco", Arial, sans-serif;
-  font-size: 10px;
+/* Components - Snackbar */
+.snackbar
+{
+  background: rgba(40, 40, 40, .8);
+  border-radius: 30px;
+  left: 10%;
+  padding: 15px;
   position: fixed;
-  top: 5px;
-  left: 5px;
-  padding: 5px 7px;
-  margin: 0;
-  border: 1px solid #ccc;
-  background: white;
-  display: block;
-  border-radius: 3px;
-  z-index: 99;
+  right: 10%;
+  top: 20px;
+  opacity: 0;
+  transform: translateY(-20px);
+
+  transition-property: opacity, transform;
+  transition-duration: .4s;
+  transition-timing-function: cubic-bezier(0, 0, 0, 1);
+}
+.snackbar.is-visible
+{
+  opacity: 1;
+  transform: translateY(0);
 }
 
-
-/* Trello */
-
-.list {
-  counter-reset: itemIndex;
+/* Components - Journey */
+.journey {
+  text-align: left;
 }
 
-.list-card {
-  counter-increment: itemIndex;
+.journey ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 20px;
 }
 
-.list-card:before {
-  content: counter(itemIndex); 
-  position: absolute; 
-  z-index: 1;
-  padding: 0 2px;
-  border-width: 0 1px 1px 0;
-  border-style: solid;
-  border-color: #ccc;
-  background: #fff;
-  border-radius: 3px 0;
-}
-
-.list-card .list-card-title {
-  text-indent: 20px;
-}
-.list-card.has-cover .list-card-title {
-  text-indent: 0;
-}
-
+/* Components - Debug */
 .dom-debug {
   position: fixed;
   bottom: 10px;
@@ -119,13 +111,3 @@ code {
   background: #ddd;
   cursor: pointer;
 }
-
-
-
-
-
-
-
-
-
-

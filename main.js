@@ -1,15 +1,36 @@
+// Apparently UK Postal Code???
+// [A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]?\s?[0-9][ABD-HJLNP-UW-Zabd-hjlnp-uw-z]{2}
+
 (function(){
+	function setTrainTime(time) {
+		document.querySelector('.js-train-time').innerText = time;
+	}
+
+	function setLeaveTime(time) {
+		document.querySelector('.js-leave-time').innerText = time;
+	}
+
 	function template(string, data) {
 		return string.replace(/%\w+%/g, function(all) {
-			return data[all.replace(/%/gi, '')] || all;
+			return data[all.replace(/%/g, '')] || all;
 		});
 	}
 
+	function isLoading() {
+		document.querySelector('.js-loader').classList.add('is-visible');
+	}
+
+	function isLoaded() {
+		document.querySelector('.js-loader').classList.remove('is-visible');
+	}
+
 	function TFLClient() {
+		this.apiRoot = 'https://api.tfl.gov.uk';
+
 		this.endpoints = {
-			'status_tube' : 'https://api.tfl.gov.uk/line/mode/tube/status',
-			'status_rail' : 'https://api.tfl.gov.uk/line/mode/national-rail/status',
-			'journey_planning' : 'https://api.tfl.gov.uk/journey/journeyresults/%0%/to/%1%'
+			'status_tube' : this.apiRoot + '/line/mode/tube/status',
+			'status_rail' : this.apiRoot + '/line/mode/national-rail/status',
+			'journey_planning' : this.apiRoot + '/journey/journeyresults/%0%/to/%1%'
 		};
 	}
 
@@ -25,21 +46,30 @@
 	TFLClient.prototype.getJourneyData = function(from, to) {
 		let requestUrl = template(this.endpoints.journey_planning, [from, to]);
 
-		return fetch(requestUrl).then(response => response.json()).then(data => {
+		return fetch(requestUrl)
+		.then(response => response.json())
+		.then(data => {
 			console.log('journey data: ', data);
 			return data;
-		}).catch(error => {
-			console.error('JOURNEY FAILED: ', error);
 		});
 	}
 
-	const homeLocation = localStorage.getItem('homeLocation');
-	const workLocation = localStorage.getItem('workLocation');
-	let userLocation = null;
-	
-	if(!homeLocation || !workLocation) {
-		console.error('Remember to set locations in localStorage');
-		return false;
+	TFLClient.prototype.getJourneyDataFromUrl = function(url) {
+		return fetch(this.apiRoot + url)
+		.then(response => response.json())
+		.then(data => {
+			console.log('journey data: ', data);
+			return data;
+		});
+	}
+
+	TFLClient.prototype.getTestJourneyData = function() {
+		let requestUrl = '/api/journey_response2.json';
+
+		return fetch(requestUrl).then(response => response.json()).then(data => {
+			console.log('test journey data: ', data);
+			return data;
+		});
 	}
 
 	function outputStatus(data) {
@@ -54,48 +84,206 @@
 		let output = document.querySelector('.status');
 		output.innerHTML = '';
 
-		data.forEach(item => {
+		data.filter(item => {
+			return item.statusSeverity < 10;
+		}).forEach(item => {
 			let lineItem = document.createElement('div');
 			lineItem.innerHTML = `${item.name}: ${item.status} (${item.statusSeverity})`;
 			output.appendChild(lineItem);
 		});
+
+		output.innerHTML += '<small>All other lines are good.</small>';
+	}
+
+	function getReadableTime(date) {
+		function padTime(time) {
+			return ('0' + time).substr(-2);
+		}
+
+		return `${padTime(date.getHours())}:${padTime(date.getMinutes())}`;
+	}
+
+	function getLegTemplate(leg) {
+		// @NOTE: Doesn't seem very nice, and not very scalable.
+		// refactor it to retrieve a template from a store perhaps, then compile it
+		switch (leg.mode.name) {
+			case 'walking':
+				return `${leg.duration} minute walk for ${leg.distance} meters, from ${leg.departurePoint.commonName} to ${leg.arrivalPoint.commonName}`;
+				break;
+			case 'tube':
+				return `${leg.duration} minute tube ride, from ${leg.departurePoint.commonName} to ${leg.arrivalPoint.commonName}`;
+				break;
+			case 'bus':
+				return `${leg.duration} minute bus ride, from ${leg.departurePoint.commonName} to ${leg.arrivalPoint.commonName}`;
+				break;
+			case 'national-rail':
+				return `${leg.duration} minute train ride, from ${leg.departurePoint.commonName} to ${leg.arrivalPoint.commonName}`;
+				break;
+			default:
+				return `no template for mode ${leg.mode.name}`;
+				break;
+		}
 	}
 
 	function outputJourney(data) {
-		
+		const journeys = data.journeys;
+
+		if(!journeys) {
+			// @NOTE: This happens in case of disambiguation needed
+			// Seems will need to support this
+			console.error('No Journeys?');
+			return;
+		}
 
 		let output = document.querySelector('.journey');
 		output.innerHTML = '';
 
-		data.forEach(item => {
-			let lineItem = document.createElement('div');
-			lineItem.innerHTML = `${item.name}: ${item.status} (${item.statusSeverity})`;
-			output.appendChild(lineItem);
+		let earliestTrainTime = null;
+		let earliestJourney = null;
+		let earliestLeg = null;
+
+		journeys.forEach(journey => {
+			let startTime = getReadableTime(new Date(journey.startDateTime));
+			let arrivalTime = getReadableTime(new Date(journey.arrivalDateTime));
+
+			let journeyItem = document.createElement('div');
+			journeyItem.innerHTML = `[${journey.duration}] ${startTime} -> ${arrivalTime}`;
+
+			let list = document.createElement('ul');
+			for(let leg of journey.legs) {
+				let item = document.createElement('li');
+				item.innerHTML = getLegTemplate(leg);
+				list.appendChild(item);
+
+				if(leg.mode.id === 'national-rail') {
+					let legArrivalTime = new Date(leg.arrivalTime);
+
+					// This journey is earliest
+					// TODO: do this better
+					if(earliestTrainTime === null || legArrivalTime.getTime() < earliestTrainTime.getTime()) {
+						earliestTrainTime = legArrivalTime;
+
+						earliestJourney = journey;
+						earliestLeg = leg;
+					}
+				}
+			}
+
+			output.appendChild(journeyItem);
+			output.appendChild(list);
 		});
+
+		if(earliestJourney !== null) {
+			setTrainTime(getReadableTime(new Date(earliestLeg.arrivalTime)));
+			setLeaveTime(getReadableTime(new Date(earliestJourney.startDateTime)));
+		}
+
+		return data;
 	}
 
-	function success(location) {
-		userLocation = location;
-		var latitude  = location.coords.latitude;
-		var longitude = location.coords.longitude;
+	function setLinks(data) {
+		document.querySelector('.js-journey-earlier').setAttribute('href', data.searchCriteria.timeAdjustments.earlier.uri);
+		document.querySelector('.js-journey-later').setAttribute('href', data.searchCriteria.timeAdjustments.later.uri);
+	}
 
-		let output = document.querySelector('.location');
+	function geoSuccess(location) {
+		const userLocation = location;
+		const latitude  = location.coords.latitude;
+		const longitude = location.coords.longitude;
 
-		output.innerHTML = '<p>You\'re at ' + latitude.toFixed(3) + '&deg; / ' + longitude.toFixed(3) + '&deg;</p>';
+		const output = document.querySelector('.location');
 
-		const client = new TFLClient();
+		output.innerHTML = `<p>You're at ${latitude.toFixed(3)}&deg; / ${longitude.toFixed(3)}&deg;</p>`;
+	}
+
+	function getStatus() {
 		client.getStatus().then(outputStatus);
-
-		client.getJourneyData(homeLocation, workLocation).then(outputJourney);
 	}
 
-	function error() {
-		console.error('Could not retrieve your location.');
+	// Strip Spaces
+	function ss(text) {
+		return (text || '').replace(/\s/, '');
 	}
 
+	function getJourneyFromUrl(url) {
+		const client = new TFLClient();
+		const fromHome = localStorage.getItem('fromHome') === 'false' ? false : true; // @TODO: This is repeated
+		const tpl = 'From %fName% (%tLoc%) to %tName% (%fLoc%)';
+
+		isLoading();
+		client.getJourneyDataFromUrl(url)
+			.catch(error => {
+				// Fallback to offline cached request for testing
+				return client.getTestJourneyData();
+			})
+			.then(outputJourney)
+			.then(setLinks)			
+			.then(isLoaded);
+	}
+
+	function getJourney() {
+		const client = new TFLClient();
+		const homeLocation = ss(localStorage.getItem('homeLocation'));
+		const workLocation = ss(localStorage.getItem('workLocation'));
+		let journeyRequest = undefined;
+
+		if(homeLocation && workLocation) {
+			const fromHome = localStorage.getItem('fromHome') === 'false' ? false : true;
+			const tpl = 'From %fName% (%fLoc%) to %tName% (%tLoc%)';
+
+			if(!!fromHome) {
+				document.querySelector('.js-direction').innerText = template(tpl, {
+					fName: 'Home', fLoc: homeLocation,
+					tName: 'Work', tLoc: workLocation
+				});
+				journeyRequest = client.getJourneyData(homeLocation, workLocation);
+			} else {
+				document.querySelector('.js-direction').innerText = template(tpl, {
+					fName: 'Work', fLoc: workLocation,
+					tName: 'Home', tLoc: homeLocation
+				});
+				journeyRequest = client.getJourneyData(workLocation, homeLocation);
+			}
+		} else {
+			console.warn('Remember to set locations in localStorage, for now test');
+			journeyRequest = client.getTestJourneyData();
+		}
+
+		isLoading();
+		journeyRequest
+			.catch(error => {
+				// Fallback to offline cached request for testing
+				return client.getTestJourneyData();
+			})
+			.then(outputJourney)
+			.then(setLinks)
+			.then(isLoaded);
+	}
+
+	/*
 	if ("geolocation" in navigator) {
-	  navigator.geolocation.getCurrentPosition(success, error);
+		navigator.geolocation.getCurrentPosition(geoSuccess, () => {
+			console.error('Could not retrieve your location.');
+		});
 	} else {
-	  console.warn('GEOLOCATION NOT SUPPORTED');
+		console.warn('GEOLOCATION NOT SUPPORTED');
 	}
+	//*/
+
+	getJourney();
+
+	document.querySelector('.js-journey-earlier').addEventListener('click', function() {
+		event.preventDefault();
+
+		getJourneyFromUrl(this.getAttribute('href'));
+	});
+
+	document.querySelector('.js-journey-later').addEventListener('click', function() {
+		event.preventDefault();
+
+		getJourneyFromUrl(this.getAttribute('href'));
+	});
+
+	// const client = new TFLClient();
+	// client.getTestJourneyData().then(outputJourney);
 })();
