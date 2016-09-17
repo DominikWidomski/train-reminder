@@ -32,7 +32,7 @@
     "js": [ "jquery.min.js", "main.js" ],
     "css": [ "main.css" ],
     "matches": [
-      "http://*/*"
+      "*://*/*"
     ]
   }],
 
