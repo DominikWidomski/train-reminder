@@ -111,7 +111,21 @@
 		return `${padTime(date.getHours())}:${padTime(date.getMinutes())}`;
 	}
 
-	function getLegTemplate(leg) {
+	// @TODO: missing DLR
+	function getLegIcon(leg) {
+		const prefix = 'icon-';
+		const mapping = {
+			'walking': 'male',
+			'tube': 'subway',
+			'bus': 'bus',
+			'national-rail': 'train'
+		};
+
+		return (prefix + mapping[leg.mode.name]) || '';
+	}
+
+	// @TODO: missing DLR
+	function getLegText(leg) {
 		// @NOTE: Doesn't seem very nice, and not very scalable.
 		// refactor it to retrieve a template from a store perhaps, then compile it
 		switch (leg.mode.name) {
@@ -131,6 +145,17 @@
 				return `no template for mode ${leg.mode.name}`;
 				break;
 		}
+	}
+
+	function getLegTemplate(leg) {
+		const legTemplate = '<div class="leg"><span class="leg-icon {{icon}}"></span><span class="tooltip">{{yield}}</span></div>';
+
+		const body = getLegText(leg);
+
+		return template(legTemplate, {
+			'yield': body,
+			'icon': getLegIcon(leg)
+		});
 	}
 
 	function outputJourney(data) {
@@ -160,6 +185,7 @@
 			let list = document.createElement('ul');
 			for(let leg of journey.legs) {
 				let item = document.createElement('li');
+				item.classList.add('leg-item');
 				item.innerHTML = getLegTemplate(leg);
 				list.appendChild(item);
 

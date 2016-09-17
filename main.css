@@ -79,6 +79,47 @@ body.train-popup {
   margin: 20px;
 }
 
+/* Component - Journey Leg */
+.leg-item {
+  display: inline-block;
+  position: relative;
+}
+
+.leg-icon {
+  color: #45a8ea;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.leg-item + .leg-item {
+  padding-left: 20px;
+}
+
+.leg-item + .leg-item:before {
+  background: #FFF;
+  content: '';
+  display: block;
+  height: 1px;
+  left: 0;
+  position: absolute;
+  top: 50%;
+  width: 100%;
+}
+
+.leg {
+  background: #FFF;
+  border-radius: 20px;
+  height: 40px;
+  position: relative;
+  width: 40px;
+}
+
+.leg .tooltip {
+  display: none;
+}
+
 /* Components - Debug */
 .dom-debug {
   position: fixed;
