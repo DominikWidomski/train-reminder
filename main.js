@@ -256,6 +256,7 @@
 			}
 		} else {
 			console.warn('Remember to set locations in localStorage, for now test');
+			// @NOTE: Don't show test fallback, create UI fallback
 			journeyRequest = client.getTestJourneyData();
 		}
 
@@ -263,6 +264,7 @@
 		journeyRequest
 			.catch(error => {
 				// Fallback to offline cached request for testing
+				// @NOTE: Don't show test fallback, create UI fallback
 				return client.getTestJourneyData();
 			})
 			.then(outputJourney)
