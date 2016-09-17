@@ -1,5 +1,5 @@
 /* Base */
-body {
+body.train-popup {
   font: 16px 'Helvetica Neue';
   min-width: 400px;
   overflow-x: hidden;
@@ -10,7 +10,7 @@ body {
 }
 
 /* General */
-code {
+.train-popup code {
   font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
   font-size: 12px;
   /*font-family: "Monaco", monospace;*/
