@@ -11,8 +11,8 @@
 	}
 
 	function template(string, data) {
-		return string.replace(/%\w+%/g, function(all) {
-			return data[all.replace(/%/g, '')] || all;
+		return string.replace(/{{\s*?\w+\s*?}}/g, function(all) {
+			return data[all.replace(/[{}]/g, '').trim()] || all;
 		});
 	}
 
@@ -30,7 +30,7 @@
 		this.endpoints = {
 			'status_tube' : this.apiRoot + '/line/mode/tube/status',
 			'status_rail' : this.apiRoot + '/line/mode/national-rail/status',
-			'journey_planning' : this.apiRoot + '/journey/journeyresults/%0%/to/%1%'
+			'journey_planning' : this.apiRoot + '/journey/journeyresults/{{ 0 }}/to/{{ 1 }}'
 		};
 	}
 
@@ -218,7 +218,7 @@
 	function getJourneyFromUrl(url) {
 		const client = new TFLClient();
 		const fromHome = localStorage.getItem('fromHome') === 'false' ? false : true; // @TODO: This is repeated
-		const tpl = 'From %fName% (%tLoc%) to %tName% (%fLoc%)';
+		const tpl = 'From {{fName}} ({{tLoc}}) to {{tName}} ({{fLoc}})';
 
 		isLoading();
 		client.getJourneyDataFromUrl(url)
@@ -239,7 +239,7 @@
 
 		if(homeLocation && workLocation) {
 			const fromHome = localStorage.getItem('fromHome') === 'false' ? false : true;
-			const tpl = 'From %fName% (%fLoc%) to %tName% (%tLoc%)';
+			const tpl = 'From {{fName}} ({{fLoc}}) to {{tName}} ({{tLoc}})';
 
 			if(!!fromHome) {
 				document.querySelector('.js-direction').innerText = template(tpl, {
