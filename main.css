@@ -21,6 +21,15 @@ body.train-popup {
   padding: 0;
 }
 
+button {
+  background: transparent;
+  border-radius: 5px;
+  border: 1px solid #EEE;
+  color: #FFF;
+  cursor: pointer;
+  padding: 10px;
+}
+
 /* Helpers */
 .text-center
 {
@@ -35,12 +44,12 @@ body.train-popup {
   clear: both;
 }
 
-.col-left
+.pull-left
 {
   float: left;
 }
 
-.col-right
+.pull-right
 {
   float: right;
 }
@@ -68,9 +77,15 @@ body.train-popup {
   transform: translateY(0);
 }
 
+/* Componenet Time Navigator */
+.time-nav {
+  color: #FFF;
+  padding: 15px 0;
+}
+
 /* Components - Journey */
 .journey {
-  text-align: left;
+  /*text-align: left;*/
 }
 
 .journey ul {

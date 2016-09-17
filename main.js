@@ -121,6 +121,7 @@
 			'national-rail': 'train'
 		};
 
+		// @TODO: Change this to return something if mapping exists
 		return (prefix + mapping[leg.mode.name]) || '';
 	}
 
@@ -180,7 +181,7 @@
 			let arrivalTime = getReadableTime(new Date(journey.arrivalDateTime));
 
 			let journeyHeader = document.createElement('div');
-			journeyHeader.innerHTML = `[${journey.duration}] ${startTime} -> ${arrivalTime}`;
+			journeyHeader.innerHTML = `${startTime} <span class="icon-angle-right"></span> ${arrivalTime} (${journey.duration}m)`;
 
 			let list = document.createElement('ul');
 			for(let leg of journey.legs) {
@@ -218,8 +219,8 @@
 	function setLinks(data) {
 		const date = getReadableTime(new Date(data.searchCriteria.dateTime));
 		document.querySelector('.js-current-journey-time').innerText = date;
-		document.querySelector('.js-journey-earlier').setAttribute('href', data.searchCriteria.timeAdjustments.earlier.uri);
-		document.querySelector('.js-journey-later').setAttribute('href', data.searchCriteria.timeAdjustments.later.uri);
+		document.querySelector('.js-journey-earlier').dataset.uri = data.searchCriteria.timeAdjustments.earlier.uri;
+		document.querySelector('.js-journey-later').dataset.uri = data.searchCriteria.timeAdjustments.later.uri;
 	}
 
 	function geoSuccess(location) {
@@ -313,13 +314,13 @@
 	document.querySelector('.js-journey-earlier').addEventListener('click', function() {
 		event.preventDefault();
 
-		getJourneyFromUrl(this.getAttribute('href'));
+		getJourneyFromUrl(this.dataset.uri);
 	});
 
 	document.querySelector('.js-journey-later').addEventListener('click', function() {
 		event.preventDefault();
 
-		getJourneyFromUrl(this.getAttribute('href'));
+		getJourneyFromUrl(this.dataset.uri);
 	});
 
 	// const client = new TFLClient();

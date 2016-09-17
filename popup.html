@@ -33,16 +33,18 @@
 		<h1 class="js-leave-time">21:00</h1>
 	</p>
 
-	<div class="row text-center">
-		<div class="col-left">
-			<a href="" class="js-journey-earlier">Earlier</a>
-		</div>
+	<div class="row text-center time-nav">
+		<button type="button" class="js-journey-earlier">
+			<span class="icon-fast-bw"></span>
+			<span class="visually-hidden">Earlier</span>
+		</button>
 
 		<span class="js-current-journey-time"></span>
 
-		<div class="col-right">
-			<a href="" class="js-journey-later">Later</a>
-		</div>
+		<button type="button" class="js-journey-later">
+			<span class="visually-hidden">Later</span>
+			<span class="icon-fast-fw"></span>
+		</button>
 	</div>
 
 	<output class="location"></output>
