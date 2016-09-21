@@ -2,6 +2,24 @@
 // [A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]?\s?[0-9][ABD-HJLNP-UW-Zabd-hjlnp-uw-z]{2}
 
 (function(){
+	function get(obj, target = '') {
+	    const parts = target.split('.');
+	    const targetHead = parts[0];
+	    const targetTail = parts.splice(1).join('.');
+
+	    if(!targetHead) {
+	        return obj;
+	    } else {
+	        return get(obj[targetHead], targetTail);
+	    }
+	}
+
+	function template(string, data) {
+		return string.replace(/{{\s*?[\w\.]+\s*?}}/g, function(all) {
+			return get(data, all.replace(/[{}]/g, '').trim()) || all;
+		});
+	}
+
 	function setTrainTime(time) {
 		document.querySelector('.js-train-time').innerText = time;
 	}
