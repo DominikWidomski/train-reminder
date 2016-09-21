@@ -132,7 +132,20 @@ button {
 }
 
 .leg .tooltip {
+  background: #222;
+  border-radius: 5px;
+  bottom: 0;
+  color: #FFF;
   display: none;
+  left: 0;
+  position: absolute;
+  width: 100px;
+
+  z-index: 10;
+}
+
+.leg:hover .tooltip {
+  display: block;
 }
 
 /* Components - Debug */
