@@ -28,13 +28,13 @@
 
   "options_page": "options.html",
 
-  "content_scripts": [ {
-    "js": [ "jquery.min.js", "main.js" ],
-    "css": [ "main.css" ],
-    "matches": [
-      "*://*/*"
-    ]
-  }],
+  // "content_scripts": [ {
+  //   "js": [ "jquery.min.js", "main.js" ],
+  //   "css": [ "main.css" ],
+  //   "matches": [
+  //     "*://*/*"
+  //   ]
+  // }],
 
   "permissions": [
     "alarms",
