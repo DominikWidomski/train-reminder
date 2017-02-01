@@ -9,49 +9,88 @@
 	<link rel="stylesheet" href="assets/fonts/css/fontello.css">
 </head>
 <body class="train-popup">
-	<div class="snackbar js-loader">
-		Loading...
+	<div class="js-locations-template pane hidden">
+		<h1>Locations:</h1>
+		
+		<form class="js-form" action="/api/location/create" method="put" accept-charset="utf-8">
+			<input type="text" name="name" placeholder="name...">
+			<input type="text" name="postCode" placeholder="postCode">
+			<input type="submit" value="Save">
+		</form>
+
+		<ul class="js-locations-list"></ul>
+
+		<button class="js-locations-close">Close</button>
 	</div>
 
-	<h1>Train Reminder</h1>
+	<div class="text-center">
+		<div class="snackbar js-loader">
+			Loading...
+		</div>
 
-	<p class="js-direction"></p>
+		<h1>Trainee</h1>
+		<p class="tagline">
+			helps you with trains!
+		</p>
 
-	<p>
-		Your next train is at:
-	</p>
+		<div class="row text-center">
+			<div class="col-40">
+				from:<br>
+				<select class="js-location-select" name="js-location-from" id="location-from"></select>
+			</div>
+			<div class="col-20">
+				<button type="button" class="js-location-swap">swap</button>
+			</div>
+			<div class="col-40">
+				to:<br>
+				<select class="js-location-select" name="js-location-to" id="location-to"></select>
+			</div>
+		</div>
 
-	<p>
-		<h1 class="js-train-time">21:30</h1>
-	</p>
+		<div class="js-direction">
+			<p>
+				From {{fName}} ({{fLoc}}) to {{tName}} ({{tLoc}})
+			</p>
 
-	<p>
-		You should leave at:
-	</p>
+			<button class="js-locations-open">Manage locations</button>
+		</div>
 
-	<p>
-		<h1 class="js-leave-time">21:00</h1>
-	</p>
+		<p>
+			Your next train is at:
+		</p>
 
-	<div class="row text-center time-nav">
-		<button type="button" class="js-journey-earlier">
-			<span class="icon-fast-bw"></span>
-			<span class="visually-hidden">Earlier</span>
-		</button>
+		<p>
+			<h1 class="js-train-time">21:30</h1>
+		</p>
 
-		<span class="js-current-journey-time"></span>
+		<p>
+			You should leave at:
+		</p>
 
-		<button type="button" class="js-journey-later">
-			<span class="visually-hidden">Later</span>
-			<span class="icon-fast-fw"></span>
-		</button>
+		<p>
+			<h1 class="js-leave-time">21:00</h1>
+		</p>
+
+		<div class="time-nav">
+			<button type="button" class="js-journey-earlier">
+				<span class="icon-fast-bw"></span>
+				<span class="visually-hidden">Earlier</span>
+			</button>
+
+			<span class="js-current-journey-time"></span>
+
+			<button type="button" class="js-journey-later">
+				<span class="visually-hidden">Later</span>
+				<span class="icon-fast-fw"></span>
+			</button>
+		</div>
+
+		<output class="location"></output>
+
+		<output class="status"></output>
+
+		<output class="journey"></output>
 	</div>
-
-	<output class="location"></output>
-
-	<output class="status"></output>
-
-	<output class="journey"></output>
 
 	<script src="main.js"></script>
 </body>

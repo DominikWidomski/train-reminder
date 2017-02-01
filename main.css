@@ -3,7 +3,6 @@ body.train-popup {
   font: 16px 'Helvetica Neue';
   min-width: 400px;
   overflow-x: hidden;
-  text-align: center;
   background-color: #45a8ea;
   color: #fff;
   font: 16px 'Helvetica Neue';
@@ -31,17 +30,40 @@ button {
 }
 
 /* Helpers */
-.text-center
-{
+.text-center {
   text-align: center;
 }
 
+.text-left {
+  text-align: left;
+}
+
 /* Grid */
+.row {
+  display: flex;
+}
+
 .row:after
 {
   content: '';
   display: table;
   clear: both;
+}
+
+[class^="col"] {
+  float: left;
+}
+
+.col-20 {
+  width: 20%;
+}
+
+.col-40 {
+  width: 40%;
+}
+
+.col-50 {
+  width: 50%;
 }
 
 .pull-left
@@ -75,6 +97,15 @@ button {
 {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Headline tagline */
+.tagline {
+  font-size: 0.8em;
+  color: #2f4456;
+  margin-top: -20px;
+  border-top: 1px solid #2b85a9;
+  padding-top: 10px;
 }
 
 /* Componenet Time Navigator */
@@ -172,11 +203,30 @@ button {
   top: 20px;
   left: 0;
   right: 0;
-  bottom: 0; 
+  bottom: 0;
 }
 
 .dom-debug label:hover {
   border-radius: 3px;
   background: #ddd;
   cursor: pointer;
+}
+
+
+/* Component - New Location Pane */
+
+.pane {
+  padding: 2em;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #45a8ea;
+  z-index: 10;
+
+  transition: transform .4s ease-in-out;
+}
+.pane.hidden {
+  transform: translateY(-100%);
 }
