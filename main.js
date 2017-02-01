@@ -1,6 +1,9 @@
 // Apparently UK Postal Code???
 // [A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]?\s?[0-9][ABD-HJLNP-UW-Zabd-hjlnp-uw-z]{2}
 
+// On SPAs
+// http://tutorialzine.com/2015/02/single-page-app-without-a-framework/
+
 (function(){
 	function get(obj, target = '') {
 	    const parts = target.split('.');
@@ -28,10 +31,11 @@
 		document.querySelector('.js-leave-time').innerText = time;
 	}
 
-	function template(string, data) {
-		return string.replace(/{{\s*?\w+\s*?}}/g, function(all) {
-			return data[all.replace(/[{}]/g, '').trim()] || all;
-		});
+	function renderDirectionView(data) {
+		const elem = document.querySelector('.js-direction');
+		const tpl = elem.innerHTML;
+
+		elem.innerHTML = template(tpl, data);
 	}
 
 	function isLoading() {
@@ -145,20 +149,31 @@
 
 	// @TODO: missing DLR
 	function getLegText(leg) {
+		/**
+		 * Format time
+		 *
+		 * @param {string} time
+		 *
+		 * @return {string}
+		 */
+		function ft(time) {
+			return time.split(':').splice(1).join(':')
+		}
+
 		// @NOTE: Doesn't seem very nice, and not very scalable.
 		// refactor it to retrieve a template from a store perhaps, then compile it
 		switch (leg.mode.name) {
 			case 'walking':
-				return `${leg.duration} minute walk for ${leg.distance} meters, from ${leg.departurePoint.commonName} to ${leg.arrivalPoint.commonName}`;
+				return `${ft(leg.departureTime)}<br/>${leg.duration} minute walk for ${leg.distance} meters, from ${leg.departurePoint.commonName} to ${leg.arrivalPoint.commonName}`;
 				break;
 			case 'tube':
-				return `${leg.duration} minute tube ride, from ${leg.departurePoint.commonName} to ${leg.arrivalPoint.commonName}`;
+				return `${ft(leg.departureTime)}<br/>${leg.duration} minute tube ride, from ${leg.departurePoint.commonName} to ${leg.arrivalPoint.commonName}`;
 				break;
 			case 'bus':
-				return `${leg.duration} minute bus ride, from ${leg.departurePoint.commonName} to ${leg.arrivalPoint.commonName}`;
+				return `${ft(leg.departureTime)}<br/>${leg.duration} minute bus ride, from ${leg.departurePoint.commonName} to ${leg.arrivalPoint.commonName}`;
 				break;
 			case 'national-rail':
-				return `${leg.duration} minute train ride, from ${leg.departurePoint.commonName} to ${leg.arrivalPoint.commonName}`;
+				return `${ft(leg.departureTime)}<br/>${leg.duration} minute train ride, from ${leg.departurePoint.commonName} to ${leg.arrivalPoint.commonName}`;
 				break;
 			default:
 				return `no template for mode ${leg.mode.name}`;
@@ -190,9 +205,9 @@
 		let output = document.querySelector('.journey');
 		output.innerHTML = '';
 
-		let earliestTrainTime = null;
-		let earliestJourney = null;
-		let earliestLeg = null;
+		let earliestTrainTime;
+		let earliestJourney;
+		let earliestLeg;
 
 		journeys.forEach(journey => {
 			let startTime = getReadableTime(new Date(journey.startDateTime));
@@ -213,7 +228,7 @@
 
 					// This journey is earliest
 					// TODO: do this better
-					if(earliestTrainTime === null || legArrivalTime.getTime() < earliestTrainTime.getTime()) {
+					if(!earliestTrainTime || legArrivalTime.getTime() < earliestTrainTime.getTime()) {
 						earliestTrainTime = legArrivalTime;
 
 						earliestJourney = journey;
@@ -226,8 +241,8 @@
 			output.appendChild(list);
 		});
 
-		if(earliestJourney !== null) {
-			setTrainTime(getReadableTime(new Date(earliestLeg.arrivalTime)));
+		if(earliestJourney) {
+			setTrainTime(getReadableTime(new Date(earliestLeg.departureTime)));
 			setLeaveTime(getReadableTime(new Date(earliestJourney.startDateTime)));
 		}
 
@@ -260,10 +275,17 @@
 		return (text || '').replace(/\s/, '');
 	}
 
+	function loadData() {
+		return JSON.parse(localStorage.getItem('locations'));
+	}
+
+	function saveData(data) {
+		localStorage.setItem('locations', JSON.stringify(data));
+	}
+
 	function getJourneyFromUrl(url) {
 		const client = new TFLClient();
 		const fromHome = localStorage.getItem('fromHome') === 'false' ? false : true; // @TODO: This is repeated
-		const tpl = 'From {{fName}} ({{tLoc}}) to {{tName}} ({{fLoc}})';
 
 		isLoading();
 		client.getJourneyDataFromUrl(url)
@@ -276,28 +298,27 @@
 			.then(isLoaded);
 	}
 
-	function getJourney() {
+	function getJourney(fromLocation, toLocation) {
 		const client = new TFLClient();
-		const homeLocation = ss(localStorage.getItem('homeLocation'));
-		const workLocation = ss(localStorage.getItem('workLocation'));
+		// const fromLocation = ss(localStorage.getItem('fromLocation'));
+		// const toLocation = ss(localStorage.getItem('toLocation'));
 		let journeyRequest = undefined;
 
-		if(homeLocation && workLocation) {
+		if(fromLocation && toLocation) {
 			const fromHome = localStorage.getItem('fromHome') === 'false' ? false : true;
-			const tpl = 'From {{fName}} ({{fLoc}}) to {{tName}} ({{tLoc}})';
 
 			if(!!fromHome) {
-				document.querySelector('.js-direction').innerText = template(tpl, {
-					fName: 'Home', fLoc: homeLocation,
-					tName: 'Work', tLoc: workLocation
+				renderDirectionView({
+					fName: 'Home', fLoc: fromLocation,
+					tName: 'Work', tLoc: toLocation
 				});
-				journeyRequest = client.getJourneyData(homeLocation, workLocation);
+				journeyRequest = client.getJourneyData(fromLocation, toLocation);
 			} else {
-				document.querySelector('.js-direction').innerText = template(tpl, {
-					fName: 'Work', fLoc: workLocation,
-					tName: 'Home', tLoc: homeLocation
+				renderDirectionView({
+					fName: 'Work', fLoc: toLocation,
+					tName: 'Home', tLoc: fromLocation
 				});
-				journeyRequest = client.getJourneyData(workLocation, homeLocation);
+				journeyRequest = client.getJourneyData(toLocation, fromLocation);
 			}
 		} else {
 			console.warn('Remember to set locations in localStorage, for now test');
@@ -332,13 +353,192 @@
 	document.querySelector('.js-journey-earlier').addEventListener('click', function() {
 		event.preventDefault();
 
+		// @TODO: This is not fault resilient, i.e. uri missing
 		getJourneyFromUrl(this.dataset.uri);
 	});
 
 	document.querySelector('.js-journey-later').addEventListener('click', function() {
 		event.preventDefault();
 
+		// @TODO: This is not fault resilient, i.e. uri missing
 		getJourneyFromUrl(this.dataset.uri);
+	});
+
+	class LocationManager {
+		// constructor() {}
+
+		get fromLocation() {
+			return this.fromLocation;
+		}
+
+		set fromLocation(location) {
+			this.fromLocation = location;
+		}
+
+		get toLocation() {
+			return this.toLocation;
+		}
+
+		set toLocation(location) {
+			this.toLocation = location;
+		}
+
+		init() {
+			this.selects = Array.from(document.querySelectorAll('.js-location-select'));
+			this.fromSelect = this.selects.find(select => select.name === 'js-location-from');
+			this.toSelect = this.selects.find(select => select.name === 'js-location-to');
+			this.swapDirection = document.querySelector('.js-location-swap');
+
+			this.selects.forEach(select => {
+				select.addEventListener('change', event => {
+
+					getJourney(this.fromSelect.value, this.toSelect.value);
+				});
+			});
+
+			this.swapDirection.addEventListener('click', event => {
+				const from = this.fromSelect.value;
+				const to = this.toSelect.value;
+
+				this.fromSelect.value = to;
+				this.toSelect.value = from;
+
+				getJourney(to, from);
+			});
+		}
+
+		loadLocations() {
+			this.locations = locationsView.loadData();
+
+			const options = this.locations.map(location => {
+				return `<option value="${location.postCode}">${location.name}</option>`;
+			}).join('');
+
+			this.selects.forEach(select => {
+				select.innerHTML = options;
+			});
+		}
+	}
+
+	const keys = {
+		ESC: 27
+	};
+
+	class LocationsView {
+		constructor() {
+			this.open = document.querySelector('.js-locations-open');
+			this.close = document.querySelector('.js-locations-close');
+			this.view = document.querySelector('.js-locations-template');
+			this.locationsList = this.view.querySelector('.js-locations-list');
+		}
+
+		loadData() {
+			return JSON.parse(localStorage.getItem('locations')) || [];
+		}
+
+		saveData(data) {
+			localStorage.setItem('locations', JSON.stringify(data));
+		}
+
+		/**
+		 * This would require some sort of validation somewhere
+		 */
+		createLocation(formData) {
+			const locations = this.loadData();
+
+			locations.push({
+				name: formData.get('name'),
+				postCode: formData.get('postCode')
+			});
+
+			this.saveData(locations);
+			this.renderLocationsList(locations);
+		}
+
+		/**
+		 * Delete location from localStore at specified index
+		 *
+		 * @param {int} index
+		 */
+		deleteLocation(index) {
+			const locations = this.loadData();
+			
+			locations.splice(index, 1);
+			this.saveData(locations);
+
+			this.renderLocationsList(locations);
+		}
+
+		renderLocationsList(locations) {
+			let html = '';
+
+			if(locations.length === 0) {
+				html = '<li>No locations available</li>';
+			} else {
+				html += locations.map(location => {
+					return `<li><span class="remove">&times;</span> ${location.name} - ${location.postCode}</li>`;
+				}).join('');
+			}
+
+			this.locationsList.innerHTML = html;
+
+			this.locationsList.querySelectorAll('li').forEach((el, index) => {
+				el.addEventListener('click', event => {
+					if(event.target.classList.contains('remove')) {
+						this.deleteLocation(index);
+					}
+				});
+			});
+		}
+
+		handleKeydown(event) {
+			if(event.keyCode === keys.ESC) {
+				event.preventDefault();
+				this.view.classList.add('hidden');
+			}
+		}
+
+		init() {
+			this.renderLocationsList(this.loadData());
+
+			this.open.addEventListener('click', event => {
+				this.view.classList.remove('hidden');
+			}, false);
+
+			this.close.addEventListener('click', event => {
+				this.view.classList.add('hidden');
+			}, false);
+
+			const boundKeydownHandler = this.handleKeydown.bind(this);
+
+			document.addEventListener('keydown', boundKeydownHandler);
+		}
+	}
+
+	const locationsView = new LocationsView();
+	locationsView.init();
+
+	const locationManager = new LocationManager();
+	locationManager.init();
+	locationManager.loadLocations();
+
+	const forms = document.querySelectorAll('.js-form');
+	forms.forEach(form => {
+		form.addEventListener('submit', event => {
+			const form = event.target;
+			const action = form.getAttribute('action');
+			const api = {
+				'/api/location/create': locationsView.createLocation.bind(locationsView)
+			};
+
+			event.preventDefault();
+
+			if(api[action]) {
+				api[action](new FormData(form));
+			} else {
+				console.warn('API end not defined');
+			}
+		});
 	});
 
 	// const client = new TFLClient();
